@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using ToDo.Entity;
 
 namespace ToDo.Server
@@ -10,7 +11,9 @@ namespace ToDo.Server
     {
         public static void Main(string[] args)
         {
-            var host = CreateHostBuilder(args).Build();
+            var host = CreateHostBuilder(args).ConfigureLogging(log=>
+                log.AddJsonConsole()
+                ).Build();
             using (var serviceScope = host.Services.CreateScope())
             {
                 using var context = serviceScope.ServiceProvider.GetRequiredService<TodoContext>();
@@ -18,6 +21,7 @@ namespace ToDo.Server
                 Console.WriteLine($"创建结果{ensureCreated} ");
             }
 
+            
             host.Run();
         }
 

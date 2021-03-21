@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ToDo.Entity;
 using ToDo.Shared;
 
@@ -13,10 +15,12 @@ namespace ToDo.Server.Controllers
     public class TaskController : ControllerBase
     {
         private readonly TodoContext Context;
+        private readonly ILogger<TaskController> _logger;
 
-        public TaskController(TodoContext context)
+        public TaskController(TodoContext context, ILogger<TaskController> logger)
         {
             Context = context;
+            _logger = logger;
         }
 
         // 1、	列出当天的所有代办工作
@@ -127,11 +131,23 @@ namespace ToDo.Server.Controllers
 
         //8、    列出重要的未完成工作
         [HttpGet]
-        public List<TaskDto> GetStarTask()
+        public List<TaskDto> GetStarTask(int pageIndex, int pageSize)
         {
-            var tasks = Context.Task.Where(x=>x.IsImportant && x.IsFinish==false ).OrderByDescending(x=>x.TaskId );
-            
-             return QueryToDto(tasks).ToList();
+            Console.WriteLine($"ccc Processing request from {pageIndex}-{pageSize}");
+            _logger.LogDebug("xxx Processing request from {PageIndex}-{PageSize}", pageIndex, pageSize);
+            var tasks = Context.Task.Where(x => x.IsImportant && x.IsFinish == false);
+            var sum = tasks;
+            var count = sum.Select(x => x.TaskId).CountAsync();
+            Console.WriteLine($"Processing result={count.Result}");
+            if (pageIndex == 0 && pageSize == 0)
+            {
+                pageIndex = 1;
+                pageSize = 10;
+            }
+
+            tasks = tasks.Skip(--pageIndex * pageSize).Take(pageSize);
+            tasks = tasks.OrderByDescending(x => x.TaskId);
+            return QueryToDto(tasks).ToList();
         }
     }
 }

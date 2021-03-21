@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -91,6 +92,16 @@ namespace ToDo.Client.Pages
         {
             if (await ConfirmSrv.Show($"是否删除任务 {task.Title}", "删除", ConfirmButtons.YesNo) == ConfirmResult.Yes)
                 taskDtos.Remove(task);
+        }
+        
+        
+        private async void OnPageIndexChange(PaginationEventArgs obj)
+        {
+            isLoading = true;
+            taskDtos = await Http.GetFromJsonAsync<List<TaskDto>>($"api/Task/GetStarTask?PageIndex={obj.PageIndex}&PageSize={obj.PageSize}");
+            Console.WriteLine(taskDtos.Count);
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 }

@@ -2,7 +2,7 @@
 
 <PageHeader Title="@("重要的任务")" Subtitle="@($"数量：{taskDtos?.Count}")"></PageHeader>
     <NewTask OnInserted="OnInsert" NewTaskFunc="() => new TaskDto {PlanTime = DateTime.Now.Date, IsImportant = true}"></NewTask>
-
+<Pagination  OnPageIndexChange="OnPageIndexChange" Total="500" PageSizeOptions="new []{10,20,30,50}"></Pagination>
 <Spin Spinning="@isLoading">
     @foreach (var item in taskDtos)
     {
